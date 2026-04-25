@@ -1,40 +1,63 @@
-# SPDX-FileCopyrightText: © 2024 Tiny Tapeout
-# SPDX-License-Identifier: Apache-2.0
-
 import cocotb
-from cocotb.clock import Clock
-from cocotb.triggers import ClockCycles
+from cocotb.triggers import Timer
+
+def alu_model(a, b, op):
+    """Reference model"""
+    carry = 0
+    if op == 0:   # ADD
+        tmp = a + b
+        carry = (tmp >> 2) & 1
+        res = tmp & 0b11
+    elif op == 1: # SUB
+        tmp = (a - b) & 0b111  # keep 3 bits for borrow
+        carry = (tmp >> 2) & 1
+        res = tmp & 0b11
+    elif op == 2: res = a & b
+    elif op == 3: res = a | b
+    elif op == 4: res = a ^ b
+    elif op == 5: res = (~a) & 0b11
+    elif op == 6: res = (a << 1) & 0b11
+    elif op == 7: res = (a >> 1) & 0b11
+    return res, carry
 
 
 @cocotb.test()
-async def test_project(dut):
-    dut._log.info("Start")
+async def test_alu(dut):
+    """Test all ALU operations"""
 
-    # Set the clock period to 10 us (100 KHz)
-    clock = Clock(dut.clk, 10, unit="us")
-    cocotb.start_soon(clock.start())
-
-    # Reset
-    dut._log.info("Reset")
-    dut.ena.value = 1
+    # Initialize signals
     dut.ui_in.value = 0
     dut.uio_in.value = 0
-    dut.rst_n.value = 0
-    await ClockCycles(dut.clk, 10)
+    dut.ena.value = 1
+    dut.clk.value = 0
     dut.rst_n.value = 1
 
-    dut._log.info("Test project behavior")
+    await Timer(1, units="ns")
 
-    # Set the input values you want to test
-    dut.ui_in.value = 20
-    dut.uio_in.value = 30
+    # Loop through all combinations
+    for op in range(8):
+        for a in range(4):
+            for b in range(4):
 
-    # Wait for one clock cycle to see the output values
-    await ClockCycles(dut.clk, 1)
+                # Pack inputs
+                ui_val = (op << 4) | (b << 2) | a
+                dut.ui_in.value = ui_val
 
-    # The following assersion is just an example of how to check the output values.
-    # Change it to match the actual expected output of your module:
-    assert dut.uo_out.value == 50
+                await Timer(1, units="ns")
 
-    # Keep testing the module by changing the input values, waiting for
-    # one or more clock cycles, and asserting the expected output values.
+                # Read output
+                out = dut.uo_out.value.integer
+                result = out & 0b11
+                carry  = (out >> 2) & 1
+
+                # Expected
+                exp_res, exp_carry = alu_model(a, b, op)
+
+                dut._log.info(
+                    f"op={op} a={a} b={b} -> res={result} carry={carry}"
+                )
+
+                assert result == exp_res, f"Result FAIL op={op} a={a} b={b}"
+                assert carry == exp_carry, f"Carry FAIL op={op} a={a} b={b}"
+
+    dut._log.info("All ALU tests passed ✅")
