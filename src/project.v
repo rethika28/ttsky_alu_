@@ -12,11 +12,11 @@ module tt_um_alu (
 );
 
     // Inputs
-    wire [1:0] a = ui_in[1:0];
-    wire [1:0] b = ui_in[3:2];
+    wire [1:0] a  = ui_in[1:0];
+    wire [1:0] b  = ui_in[3:2];
     wire [2:0] op = ui_in[6:4];
 
-    // Internal
+    // Internal signals
     reg [1:0] result;
     reg carry;
 
@@ -25,23 +25,27 @@ module tt_um_alu (
         carry  = 1'b0;
 
         case (op)
-            3'b000: {carry, result} = a + b;      // ADD
-            3'b001: {carry, result} = a - b;      // SUB
-            3'b010: result = a & b;               // AND
-            3'b011: result = a | b;               // OR
-            3'b100: result = a ^ b;               // XOR
-            3'b101: result = ~a;                  // NOT
-            3'b110: result = a << 1;              // SHIFT LEFT
-            3'b111: result = a >> 1;              // SHIFT RIGHT
+            3'b000: {carry, result} = a + b; // ADD
+
+            3'b001: begin                   // SUB (fixed)
+                {carry, result} = {1'b0, a} - {1'b0, b};
+            end
+
+            3'b010: result = a & b;         // AND
+            3'b011: result = a | b;         // OR
+            3'b100: result = a ^ b;         // XOR
+            3'b101: result = ~a;            // NOT
+            3'b110: result = (a << 1) & 2'b11; // SHIFT LEFT
+            3'b111: result = (a >> 1);      // SHIFT RIGHT
         endcase
     end
 
-    // Output mapping (single assignment → lint safe)
+    // Single assignment (lint-safe)
     assign uo_out = {5'b00000, carry, result};
 
     // Unused IO
-    assign uio_out = 8'b0;
-    assign uio_oe  = 8'b0;
+    assign uio_out = 8'b00000000;
+    assign uio_oe  = 8'b00000000;
 
     wire _unused = &{ena, clk, rst_n, uio_in, 1'b0};
 
