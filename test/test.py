@@ -1,7 +1,7 @@
 import cocotb
 from cocotb.triggers import Timer
 
-def alu_model(a, b, op):
+def alu(a, b, op):
     """Reference model"""
     carry = 0
     if op == 0:   # ADD
