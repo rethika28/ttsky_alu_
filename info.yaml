@@ -1,9 +1,9 @@
 # Tiny Tapeout project information
 project:
-  title:        ""      # Project title
-  author:       ""      # Your name
+  title:        "ALU"      # Project title
+  author:       "Rethika"      # Your name
   discord:      ""      # Your discord username, for communication and automatically assigning you a Tapeout role (optional)
-  description:  ""      # One line description of what your project does
+  description:  "This project implements a 2-bit Arithmetic Logic Unit (ALU) using combinational logic. It performs multiple operations such as addition, subtraction, AND, OR, XOR, NOT, and bit shifts based on a 3-bit opcode. Inputs a and b are 2-bit values, and the result along with carry/borrow is produced as output"      # One line description of what your project does
   language:     "Verilog" # other examples include SystemVerilog, Amaranth, VHDL, etc
   clock_hz:     0       # Clock frequency in Hz (or 0 if not applicable)
 
@@ -23,19 +23,19 @@ project:
 # This section is for the datasheet/website. Use descriptive names (e.g., RX, TX, MOSI, SCL, SEG_A, etc.).
 pinout:
   # Inputs
-  ui[0]: ""
-  ui[1]: ""
-  ui[2]: ""
-  ui[3]: ""
-  ui[4]: ""
-  ui[5]: ""
-  ui[6]: ""
+  ui[0]: "a[0]"
+  ui[1]: "a[1]"
+  ui[2]: "b[0]"
+  ui[3]: "b[1]"
+  ui[4]: "op[0]"
+  ui[5]: "op[1]"
+  ui[6]: "op[2]"
   ui[7]: ""
 
   # Outputs
-  uo[0]: ""
-  uo[1]: ""
-  uo[2]: ""
+  uo[0]: "result[0]"
+  uo[1]: "result[1]"
+  uo[2]: "carry"
   uo[3]: ""
   uo[4]: ""
   uo[5]: ""
